@@ -193,14 +193,13 @@ x
 #| Exercise 2.28
 Write a procedure fringe that takes as argument a tree (represented as a list)
 and returns a list whose elements are all the leaves of the tree arranged in
-left-to-right order. For example,
+left-to-right order. For example |#
 
-(define x (list (list 1 2) (list 3 4)))
-(fringe x)
-(1 2 3 4)
-(fringe (list x x))
-(1 2 3 4 1 2 3 4)
-|#
+;;(define x (list (list 1 2) (list 3 4)))
+;;(fringe x)
+;;(1 2 3 4)
+;;(fringe (list x x))
+;;(1 2 3 4 1 2 3 4)|#
 
 (define (fringe tree)
   (define (cata items acc)
@@ -277,16 +276,29 @@ How much do you need to change your programs to convert to the new representatio
         ((not (pair? mobile)) mobile)
         (else (+ (total-weight (branch-structure (left-branch mobile)))
                  (total-weight (branch-structure (right-branch mobile)))))))
+    
 
 ;test
 (define a (make-mobile (make-branch 2 3) (make-branch 2 3))) 
-(total-weight a)
+(total-weight a) ;6
 
-(define b (make-branch 2 1))
-(define c (make-branch 2 b))
-(define m (make-mobile a c))
+;test performance
+(define (test-performance mobile)
+  (display "Performance of total-weight: ")
+  (time (total-weight mobile)))
 
-;(total-weight m) ;3
+(define (make-large-mobile size)
+  (if (= size 0)
+      1
+      (make-mobile (make-branch size (make-large-mobile (- size 1)))
+                   (make-branch size (make-large-mobile (- size 1))))))
+
+(define large-mobile (make-large-mobile 20))
+
+(test-performance large-mobile)
+;;Performance of total-weight: cpu time: 16 real time: 16 gc time: 0
+;;1048576
+
 
 (define (torque branch)
   (* (branch-length branch) (total-weight (branch-structure branch)))) 
@@ -299,13 +311,11 @@ How much do you need to change your programs to convert to the new representatio
             (balanced? (branch-structure (right-branch mobile)))))) 
 
 
-
-
-;test
-
-  
+;test  
  (define d (make-mobile (make-branch 10 a) (make-branch 12 5))) 
+ (balanced? d)
+
  
-  
- (balanced? d) 
-    
+
+
+
