@@ -150,3 +150,40 @@ Fill in the missing expressions in the following definition of accumulate-n:|#
 (define s (list (list 1 2 3) (list 4 5 6) (list 7 8 9) (list 10 11 12)))
 
 (accumulate-n + 0 s) ;'(22 26 30)
+
+
+#|Exercise 2.37
+Suppose we represent vectors v = (vi ) as sequences of numbers,
+and matrices m = (mij ) as sequences of vectors (the rows of the matrix) |#
+
+(define r1 (list 1 2 3 4))
+(define r2 (list 4 5 6 6))
+(define r3 (list 6 7 8 9))
+
+(define u (list 1 1 1 1))
+
+(define m (list r1 r2 r3))
+(define n (list (list 1 2) (list 1 2) (list 1 2) (list 1 2)))
+
+(define (dot-product v w)
+  (accumulate + 0 (map * v w)))
+
+(define (matrix-*-vector m v)
+  (map (lambda (x) (dot-product x v)) m))
+
+(matrix-*-vector m u) ;'(10 21 30)
+
+(define (transpose m)
+  (accumulate-n cons null m))
+
+(transpose m) ;'((1 4 6) (2 5 7) (3 6 8) (4 6 9))
+
+(define (matrix-*-matrix m n)
+  (map (lambda (x) (matrix-*-vector m x)) (transpose n)))
+
+(matrix-*-matrix m n) ;'((10 21 30) (20 42 60))
+(matrix-*-matrix m (transpose (list u))) ;'((10 21 30))
+
+(define i (list (list 1 0 0 0) (list 0 1 0 0) (list 0 0 1 0) (list 0 0 0 1)))
+(matrix-*-matrix m i) ;'((1 4 6) (2 5 7) (3 6 8) (4 6 9))
+  
