@@ -331,26 +331,30 @@ with 1 <= j < i <= n. Use unique-pairs to simplify the definition of prime-sum
 Write a procedure to find all ordered triples of distinct positive integers i, j, and k
 less than or equal to a given integer n that sum to a given integer s|#
 
-(define (unique-triples0 n)
-  (flatmap
-   (lambda (i)
-     (map (lambda (j)
-            (map (lambda (k) (list i j k))
-                 (enumerate-interval 1 (- j 1))))
-          (enumerate-interval 1 (- i 1))))
-   (enumerate-interval 1 n)))
-
-(unique-triples0 4) ;'(() () ((3 2 1)) () ((4 2 1)) ((4 3 1) (4 3 2)))
-
-
+;;lesson-learned: flatmap * 2
 
 (define (unique-triples n)
   (flatmap
    (lambda (i)
-     (map (lambda (j)
+     (flatmap (lambda (j)
             (map (lambda (k) (list i j k))
                  (enumerate-interval 1 (- j 1))))
           (enumerate-interval 2 (- i 1))))
    (enumerate-interval 3 n)))
 
-(unique-triples 5) ;'(((3 2 1)) ((4 2 1)) ((4 3 1) (4 3 2)) ((5 2 1)) ((5 3 1) (5 3 2)) ((5 4 1) (5 4 2) (5 4 3)))
+(unique-triples 6) ;'((3 2 1) (4 2 1) (4 3 1) (4 3 2) (5 2 1) (5 3 1) (5 3 2) (5 4 1) (5 4 2) (5 4 3) (6 2 1) (6 3 1) (6 3 2) (6 4 1) (6 4 2) (6 4 3) (6 5 1) (6 5 2) (6 5 3) (6 5 4))
+
+(define (less-sum? s triple)
+  (<= (apply + triple) s))
+
+(define (make-triple-sum triple)
+  (list (car triple) (cadr triple) (caddr triple) (apply + triple)))
+
+(define (less-sum-triples s n)
+  (map make-triple-sum
+       ;(filter ((curry less-sum?) s) (unique-triples n))))
+       (filter (lambda (t) (less-sum? s t)) (unique-triples n))))
+
+;test
+(less-sum-triples 10 6) ;'((3 2 1 6) (4 2 1 7) (4 3 1 8) (4 3 2 9) (5 2 1 8) (5 3 1 9) (5 3 2 10) (5 4 1 10) (6 2 1 9) (6 3 1 10))
+
