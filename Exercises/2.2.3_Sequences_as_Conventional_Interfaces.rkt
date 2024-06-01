@@ -223,7 +223,7 @@ Complete the following definitions of reverse (Exercise 2.18) in terms of fold-r
 (reverse '(1 2 3 4)) ;'(4 3 2 1)
 
 (define (reverse-l sequence)
-  (fold-left (lambda (x y) (append (list y) x)) null sequence))
+  (fold-left (lambda (x y) (cons y x)) null sequence))
 
 ;test
 (reverse-l '(1 2 3 4)) ;'(4 3 2 1)
