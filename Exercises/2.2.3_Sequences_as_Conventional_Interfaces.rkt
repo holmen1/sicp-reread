@@ -373,24 +373,28 @@ The “eight-queens puzzle” asks how to place eight queens on a chessboard so 
 (define (col position)
   (car position))
 
-;; kth queen in first column, see adjoin-position
-(define (queen-k-row positions)
-  (row (car positions)))
+(define (row-offset q1 q2)
+  (abs (- (row q2) (row q1))))
 
-;; implicit k
-(define (safe-row? positions)
-  (let ((q-row (queen-k-row positions)))
-    (accumulate (lambda (p rest-of-queens)
-                  (and (not (= q-row (row p))) rest-of-queens))
-                #t
-                (cdr positions))))
+(define (check positions)
+  (let ((queen-k (car positions))) ; kth queen in first column, see adjoin-position
+    (define (test queens delta)
+      (if (null? queens)
+          #f
+          (cond ((= (row-offset queen-k (car queens)) 0) #t) ; row
+                ((= (row-offset queen-k (car queens)) delta) #t) ; diagonal
+          (else (test (cdr queens) (+ 1 delta))))))
+    (test (cdr positions) 1)))
+
+(define (safe? positions)
+  (not (check positions)))
 
 (define (queens board-size)
   (define (queen-cols k)
     (if (= k 0)
         (list empty-board)
         (filter
-         (lambda (positions) (safe-row? positions))
+         (lambda (positions) (safe? positions))
          (flatmap
           (lambda (rest-of-queens)
             (map (lambda (new-row)
@@ -400,40 +404,21 @@ The “eight-queens puzzle” asks how to place eight queens on a chessboard so 
           (queen-cols (- k 1))))))
   (queen-cols board-size))
 
-;;WORK
-(accumulate (lambda (p tail)
-              (cons (not (= 1 (row p))) tail))
-               null ;#t
-               '((1 . 3) (1 . 2) (2 . 1)))
-;'(#f #f #t)
+;;TEST
 
-(safe-row? '((4 . 4) (1 . 3) (3 . 2) (2 . 1))) ;#t
-(safe-row? '((4 . 4) (1 . 3) (3 . 2) (4 . 1))) ;f
+(length (queens 8)) ;92
 
-(queens 4) #|
-'(((4 . 4) (3 . 3) (2 . 2) (1 . 1))
-  ((3 . 4) (4 . 3) (2 . 2) (1 . 1))
-  ((4 . 4) (2 . 3) (3 . 2) (1 . 1))
-  ((2 . 4) (4 . 3) (3 . 2) (1 . 1))
-  ((3 . 4) (2 . 3) (4 . 2) (1 . 1))
-  ((2 . 4) (3 . 3) (4 . 2) (1 . 1))
-  ((4 . 4) (3 . 3) (1 . 2) (2 . 1))
-  ((3 . 4) (4 . 3) (1 . 2) (2 . 1))
-  ((4 . 4) (1 . 3) (3 . 2) (2 . 1))
-  ((1 . 4) (4 . 3) (3 . 2) (2 . 1))
-  ((3 . 4) (1 . 3) (4 . 2) (2 . 1))
-  ((1 . 4) (3 . 3) (4 . 2) (2 . 1))
-  ((4 . 4) (2 . 3) (1 . 2) (3 . 1))
-  ((2 . 4) (4 . 3) (1 . 2) (3 . 1))
-  ((4 . 4) (1 . 3) (2 . 2) (3 . 1))
-  ((1 . 4) (4 . 3) (2 . 2) (3 . 1))
-  ((2 . 4) (1 . 3) (4 . 2) (3 . 1))
-  ((1 . 4) (2 . 3) (4 . 2) (3 . 1))
-  ((3 . 4) (2 . 3) (1 . 2) (4 . 1))
-  ((2 . 4) (3 . 3) (1 . 2) (4 . 1))
-  ((3 . 4) (1 . 3) (2 . 2) (4 . 1))
-  ((1 . 4) (3 . 3) (2 . 2) (4 . 1))
-  ((2 . 4) (1 . 3) (3 . 2) (4 . 1))
-  ((1 . 4) (2 . 3) (3 . 2) (4 . 1)))
+(queens 5)
+#|
+'(((4 . 5) (2 . 4) (5 . 3) (3 . 2) (1 . 1))
+  ((3 . 5) (5 . 4) (2 . 3) (4 . 2) (1 . 1))
+  ((5 . 5) (3 . 4) (1 . 3) (4 . 2) (2 . 1))
+  ((4 . 5) (1 . 4) (3 . 3) (5 . 2) (2 . 1))
+  ((5 . 5) (2 . 4) (4 . 3) (1 . 2) (3 . 1))
+  ((1 . 5) (4 . 4) (2 . 3) (5 . 2) (3 . 1))
+  ((2 . 5) (5 . 4) (3 . 3) (1 . 2) (4 . 1))
+  ((1 . 5) (3 . 4) (5 . 3) (2 . 2) (4 . 1))
+  ((3 . 5) (1 . 4) (4 . 3) (2 . 2) (5 . 1))
+  ((2 . 5) (4 . 4) (1 . 3) (3 . 2) (5 . 1)))
 |#
 
