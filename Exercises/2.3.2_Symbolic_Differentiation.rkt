@@ -24,6 +24,15 @@
 (define (product? x) (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
 (define (multiplicand p) (caddr p))
+(define (exponentiation? x) (and (pair? x) (eq? (car x) '**)))
+(define (base e) (cadr e))
+(define (exponent e) (caddr e))
+(define (make-exponentiation b e)
+  (cond ((=number? b 0) 0)
+        ((=number? e 0) 1)
+        ((=number? e 1) b)
+        ((and (number? b) (number? e)) (expt b e))
+        (else (list '** b e))))
 
 
 (define (deriv exp var)
@@ -37,11 +46,27 @@
                           (deriv (multiplicand exp) var))
             (make-product (deriv (multiplier exp) var)
                           (multiplicand exp))))
+        ((exponentiation? exp)
+          (make-product
+            (make-product (exponent exp)
+                          (make-exponentiation (base exp) (- (exponent exp) 1)))
+            (deriv (base exp) var)))
         (else
           (error "unknown expression type: DERIV" exp))))
 
 ;test
-(deriv '(+ x 3) 'x)             ;1
-(deriv '(* x y) 'x)             ;'y
-(deriv '(* (* x y) (+ x 3)) 'x) ;'(+ (* x y) (* y (+ x 3)))
+(deriv '(+ x 3) 'x)                     ;1
+(deriv '(* x y) 'x)                     ;'y
+(deriv '(* (* x y) (+ x 3)) 'x)         ;'(+ (* x y) (* y (+ x 3)))
+(deriv '(** x 4) 'x)                    ;'(* 4 (** x 3))
+(deriv '(** (* 2 (+ 2 (** x 2))) 2) 'x) ;'(* (* 2 (* 2 (+ 2 (** x 2)))) (* 2 (* 2 x)))
 
+
+#|Exercise 2.56
+Show how to extend the basic differentiator to handle more kinds of expressions.
+For instance, implement the differentiation rule
+d (u ** n) / dx = n u ** (n - 1) du / dx
+by adding a new clause to the deriv program and defining appropriate procedures
+exponentiation?, base, exponent, and make-exponentiation.
+(You may use the symbol ** to denote exponentiation.) Build in the rules that anything
+raised to the power 0 is 1 and anything raised to the power 1 is the thing itself.|#
