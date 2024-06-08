@@ -104,15 +104,51 @@ Then the last example above could be expressed as
 
 
 #|Exercise 2.58
-Suppose we want to modify the differentia-tion program so that it works with ordinary mathematical
-notation, in which + and * are infix rather than prefix operators. Since the differentiation program
-is defined in terms of abstract data, we can modify it to work with different representations of
-expressions solely by changing the predicates, selectors, and constructors that define the representation of
-the algebraic expressions on which the differentiator is to operate.
+Suppose we want to modify the differentiation program so that it works with ordinary mathematical
+notation, in which + and * are infix rather than prefix operators.
+Since the differentiation program is defined in terms of abstract data, we can modify it to work with
+different representations of expressions solely by changing the predicates, selectors, and constructors
+that define the representation of the algebraic expressions on which the differentiator is to operate.
 
 a. Show how to do this in order to differentiate algebraic expressions presented in infix form, such as
 (x + (3 * (x + (y + 2)))).
 To simplify the task, assume that + and * always take two arguments and that expressions are fully parenthesized|#
 
+(define (infix-sum a1 a2)
+  (cond ((=number? a1 0) a2)
+        ((=number? a2 0) a1)
+        ((and (number? a1) (number? a2))
+         (+ a1 a2))
+        (else (list a1 '+ a2))))
+(define (i-sum? x) (and (pair? x) (eq? (cadr x) '+)))
+(define (i-addend s) (car s))
+(define (i-augend s) (caddr s))
 
-      
+
+(define (infix-product m1 m2)
+  (cond ((or (=number? m1 0) (=number? m2 0)) 0)
+        ((=number? m1 1) m2)
+        ((=number? m2 1) m1)
+        ((and (number? m1) (number? m2)) (* m1 m2))
+        (else (list m1 '* m2))))
+(define (i-product? x) (and (pair? x) (eq? (cadr x) '*)))
+(define (i-multiplier p) (car p))
+(define (i-multiplicand p) (caddr p))
+
+
+(define (i-deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        ((i-sum? exp) (infix-sum (i-deriv (i-addend exp) var)
+                                 (i-deriv (i-augend exp) var)))
+        ((i-product? exp)
+          (infix-sum
+            (infix-product (i-multiplier exp)
+                           (i-deriv (i-multiplicand exp) var))
+            (infix-product (i-deriv (i-multiplier exp) var)
+                           (i-multiplicand exp))))
+        (else
+          (error "unknown expression type: I-DERIV" exp))))
+
+;test
+(i-deriv '(x + (3 * (x + (y + 2)))) 'x) ;4
