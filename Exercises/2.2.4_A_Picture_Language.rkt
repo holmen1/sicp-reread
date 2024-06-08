@@ -1,6 +1,14 @@
 #lang racket
+(require sicp-pict)
+;(require 2htdp/image)
 
-#|
+; (define (beside img1 img2)
+;   (beside/align "top" img1 img2))
+
+; (define (below img1 img2)
+;   (above/align "left" img1 img2))
+
+
 (define (right-split painter n)
   (if (= n 0)
       painter
@@ -18,6 +26,7 @@
           (beside (below painter top-left)
                   (below bottom-right corner))))))
 
+;(define wave2 (beside wave (flip-vert wave)))
 
 
 #|Exercise 2.44
@@ -29,8 +38,9 @@ It is similar to right-split, except that it switches the roles of below and bes
       painter
       (let ((smaller (up-split painter (- n 1))))
         (below painter (beside smaller smaller)))))
-|#
 
+	
+(paint (up-split einstein 2))
 
 #|Exercise 2.45: right-split and up-split can be expressed
 as instances of a general spliing operation. Define a pro-
@@ -39,7 +49,7 @@ cedure split  with the property that evaluating
 (define right-split (split beside below))
 (define up-split (split below beside))
 
-produces procedures right-split and up-split with the same behaviors as the ones already defined
+produces procedures right-split and up-split with the same behaviors as the ones already defined 
 
 
 (define (split first-split second-split)
@@ -57,7 +67,6 @@ produces procedures right-split and up-split with the same behaviors as the ones
      (add-vect (scale-vect (xcor-vect v) (edge1-frame frame))
                (scale-vect (ycor-vect v) (edge2-frame frame))))))
 |#
-
 
 #|Exercise 2.46
 A two-dimensional vector v running from the origin to a point can be represented as a pair consisting
