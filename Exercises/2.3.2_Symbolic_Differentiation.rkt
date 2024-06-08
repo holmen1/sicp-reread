@@ -3,15 +3,19 @@
 (define (variable? x) (symbol? x))
 (define (same-variable? v1 v2)
   (and (variable? v1) (variable? v2) (eq? v1 v2)))
-;(define (make-sum a1 a2) (list '+ a1 a2))
 (define (=number? exp num) (and (number? exp) (= exp num)))
-(define (make-sum a1 a2)
-  (cond ((=number? a1 0) a2)
-        ((=number? a2 0) a1)
-        ((and (number? a1) (number? a2))
-          (+ a1 a2))
-        (else (list '+ a1 a2))))
-;(define (make-product m1 m2) (list '* m1 m2))
+(define (make-sum a1 a2 . args)
+  (define (inner-sum a1 a2)
+    (cond ((=number? a1 0) a2)
+          ((=number? a2 0) a1)
+          ((and (number? a1) (number? a2))
+            (+ a1 a2))
+          (else (list '+ a1 a2))))
+  (define (iter a rest)
+    (cond ((null? rest) a)
+          ((null? (cdr rest)) (inner-sum a (car rest)))
+          (else (inner-sum a (iter (car rest) (cdr rest))))))
+  (inner-sum a1 (iter a2 args)))
 (define (make-product m1 m2)
   (cond ((or (=number? m1 0) (=number? m2 0)) 0)
         ((=number? m1 1) m2)
@@ -20,7 +24,10 @@
         (else (list '* m1 m2))))
 (define (sum? x) (and (pair? x) (eq? (car x) '+)))
 (define (addend s) (cadr s))
-(define (augend s) (caddr s))
+(define (augend s)
+  (if (null? (cdddr s))
+      (caddr s)
+      (cadddr s)))
 (define (product? x) (and (pair? x) (eq? (car x) '*)))
 (define (multiplier p) (cadr p))
 (define (multiplicand p) (caddr p))
@@ -70,3 +77,22 @@ by adding a new clause to the deriv program and defining appropriate procedures
 exponentiation?, base, exponent, and make-exponentiation.
 (You may use the symbol ** to denote exponentiation.) Build in the rules that anything
 raised to the power 0 is 1 and anything raised to the power 1 is the thing itself.|#
+
+
+#|Exercise 2.57
+Extend the differentiation program to handle sums and products of arbitrary numbers of (two or more) terms.
+Then the last example above could be expressed as
+(deriv '(* x y (+ x 3)) 'x)|#
+
+;test sum
+(make-sum 'a1 'a2)              ;'(+ a1 a2)
+(make-sum 'a1 'a2 1 2 3)        ;'(+ a1 (+ a2 6))
+(make-sum 1 'a2 3 'a4 'a5)      ;'(+ 1 (+ a2 (+ 3 (+ a4 a5))))
+(augend '(+ 'a1 'a2 1 2 3))     ;'(+ a1 (+ a2 6))
+(make-sum 1 2 'a1 'a2)          ;'(+ 1 (+ 2 (+ a1 a2))) TODO fix maybe
+(augend (make-sum 1 2 'a1 'a2)) ;'(+ 2 (+ a1 a2))
+
+(deriv '(+ x y (+ x 3)) 'x) ;2
+
+
+      
