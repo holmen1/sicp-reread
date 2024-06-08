@@ -103,4 +103,16 @@ Then the last example above could be expressed as
 (deriv '(* x y (+ x 3)) 'x) ;'(+ (* x y) (* y (+ x 3)))
 
 
+#|Exercise 2.58
+Suppose we want to modify the differentia-tion program so that it works with ordinary mathematical
+notation, in which + and * are infix rather than prefix operators. Since the differentiation program
+is defined in terms of abstract data, we can modify it to work with different representations of
+expressions solely by changing the predicates, selectors, and constructors that define the representation of
+the algebraic expressions on which the differentiator is to operate.
+
+a. Show how to do this in order to differentiate algebraic expressions presented in infix form, such as
+(x + (3 * (x + (y + 2)))).
+To simplify the task, assume that + and * always take two arguments and that expressions are fully parenthesized|#
+
+
       
