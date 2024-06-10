@@ -91,25 +91,25 @@ Implement the union-unordered-set operation for the unordered-list representatio
 (define (left-branch tree) (cadr tree))
 (define (right-branch tree) (caddr tree))
 
-(define (element-of-set? x set)
-  (cond ((null? set) #f)
-        ((= x (entry set)) #t)
-        ((< x (entry set))
-          (element-of-set? x (left-branch set)))
-        ((> x (entry set))
-          (element-of-set? x (right-branch set)))))
+(define (element-of-tree? x tree)
+  (cond ((null? tree) #f)
+        ((= x (entry tree)) #t)
+        ((< x (entry tree))
+          (element-of-tree? x (left-branch tree)))
+        ((> x (entry tree))
+          (element-of-tree? x (right-branch tree)))))
 
-(define (adjoin-set x set)
-  (cond ((null? set) (make-tree x '() '()))
-        ((= x (entry set)) set)
-        ((< x (entry set))
-          (make-tree (entry set)
-                     (adjoin-set x (left-branch set))
-                     (right-branch set)))
-        ((> x (entry set))
-          (make-tree (entry set)
-                     (left-branch set)
-                     (adjoin-set x (right-branch set))))))
+(define (adjoin-tree x tree)
+  (cond ((null? tree) (make-tree x '() '()))
+        ((= x (entry tree)) tree)
+        ((< x (entry tree))
+          (make-tree (entry tree)
+                     (adjoin-tree x (left-branch tree))
+                     (right-branch tree)))
+        ((> x (entry tree))
+          (make-tree (entry tree)
+                     (left-branch tree)
+                     (adjoin-tree x (right-branch tree))))))
 
 ;Converts tree to ordered list
 (define (tree->list tree)
@@ -145,7 +145,7 @@ Implement the union-unordered-set operation for the unordered-list representatio
                     remaining-elts))))))))
 
 ;test
-(define u-tree (foldl (lambda (x tree) (adjoin-set x tree))
+(define u-tree (foldl (lambda (x tree) (adjoin-tree x tree))
                  '()
                  '(1 3 5 7 9 11)))
 u-tree ;'(1 () (3 () (5 () (7 () (9 () (11 () ()))))))
@@ -183,4 +183,31 @@ intersection-set for sets implemented as (balanced) binary trees.|#
 ;test
 (union-tree b-tree b2-tree)
 ;'(9 (3 (1 () ()) (5 () (7 () ()))) (13 (11 () ()) (17 () (19 () ()))))
+
+
+
+;;; Sets and information retrieval
+
+#|Exercise 2.66
+Implement the lookup procedure for the case where the set of records is structured as a binary tree,
+ordered by the numerical values of the keys.|#
+
+(define (lookup given-key set-of-records)
+  (cond ((null? set-of-records) #f)
+        ((= given-key (key (entry set-of-records))) (entry set-of-records))
+        ((< given-key (key (entry set-of-records)))
+          (lookup given-key (left-branch set-of-records)))
+        ((> given-key (key (entry set-of-records)))
+          (lookup given-key (right-branch set-of-records)))))
+
+;test where records are pairs
+(define (key record)
+  (car record))
+
+(define records '((5 . 'e) ((1 . 'a) () ((3 . 'c) () ())) ((9 . 'i) ((7 . 'g) () ()) ((11 . 'k) () ()))))
+
+(lookup 7 records) ;'(7 . 'g)
+
+
+
 
