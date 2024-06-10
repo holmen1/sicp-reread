@@ -53,6 +53,33 @@ Implement the union-unordered-set operation for the unordered-list representatio
 (union-unordered-set '() '(1 2 3))      ;'(1 2 3)
 
 
+
+;;; Sets as ordered lists
+
+
+(define (intersection-set set1 set2)
+  (if (or (null? set1) (null? set2))
+    '()
+    (let ((x1 (car set1)) (x2 (car set2)))
+      (cond ((= x1 x2)
+              (cons x1 (intersection-set (cdr set1)
+                    (cdr set2))))
+            ((< x1 x2)
+              (intersection-set (cdr set1) set2))
+            ((< x2 x1)
+              (intersection-set set1 (cdr set2)))))))
+
+(define (union-set set1 set2)
+  (cond ((null? set1) set2)
+        ((null? set2) set1)
+        (else
+         (let ((x1 (car set1))
+               (x2 (car set2)))
+           (cond ((= x1 x2) (cons x1 (union-set (cdr set1) (cdr set2))))
+                 ((< x1 x2) (cons x1 (union-set (cdr set1) set2)))
+                 (else (cons x2 (union-set set1 (cdr set2)))))))))
+
+
 ;;; Sets as binary trees
 ; We can represent trees by using lists. Each node will be a list of three items:
 ; the entry at the node, the left subtree, and the right subtree.
@@ -131,4 +158,29 @@ b-tree  ;'(5 (1 () (3 () ())) (9 (7 () ()) (11 () ())))
 ;                 (5
 ;     (1                        (9 
 ; ()    (3 () ())      (7 () ())  (11 () ())
+
+
+#|Exercise 2.65
+Use the results above to give Θ(n) implementations of union-set and
+intersection-set for sets implemented as (balanced) binary trees.|#
+
+(define (intersection-tree tree1 tree2)
+  (list->tree (intersection-set
+                (tree->list tree1)
+                (tree->list tree2))))
+
+;test
+(define b2-tree (list->tree '(3 5 7 9 11 13 17 19)))
+(intersection-tree b2-tree b-tree)
+;'(7 (3 () (5 () ())) (9 () (11 () ())))
+
+
+(define (union-tree tree1 tree2)
+  (list->tree (union-set
+                (tree->list tree1)
+                (tree->list tree2))))
+
+;test
+(union-tree b-tree b2-tree)
+;'(9 (3 (1 () ()) (5 () (7 () ()))) (13 (11 () ()) (17 () (19 () ()))))
 
