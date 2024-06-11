@@ -41,6 +41,9 @@ of the entire tree.  |#
 ;test
 (make-code-tree (make-leaf 'D 1) (make-leaf 'C 1))
 ; '((leaf D 1) (leaf C 1) (D C) 2)
+(symbols '((leaf D 1) (leaf C 1) (D C) 2)) ;'(D C)
+(left-branch '((leaf D 1) (leaf C 1) (D C) 2)) ;'(leaf D 1)
+(left-branch (left-branch '((leaf D 1) (leaf C 1) (D C) 2)))
 
 
 ;; The decoding procedure
@@ -62,8 +65,7 @@ of the entire tree.  |#
 
 
 ;; Sets of weighted elements
-;In our representation of trees, each non-leaf node contains a set of symbols,
-;which we have represented as a simple list
+;In our representation of trees, each non-leaf node contains a set of symbols, which we have represented as a simple list
 
 (define (adjoin-set x set)
     (cond ((null? set) (list x))
@@ -71,7 +73,7 @@ of the entire tree.  |#
           (else (cons (car set)
     (adjoin-set x (cdr set))))))
 
-;; Ordered leaf set
+#| ;; Ordered leaf set
 ;The following procedure takes a list of symbol-frequency pairs and constructs an initial ordered
 ;set of leaves, ready to be merged according to the Huffman algorithm
 (define (make-leaf-set pairs)
@@ -83,7 +85,7 @@ of the entire tree.  |#
                         (make-leaf-set (cdr pairs))))))
 ;test
 (make-leaf-set '((A 4) (B 2) (C 1) (D 1))) 
-;'((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4))
+;'((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4)) |#
 
 
 #|Exercise 2.67
@@ -104,4 +106,40 @@ Use the decode procedure to decode the message, and give the result|#
 ; (leaf A 4)                      (B D C) 4
 ;                     (leaf B 2)              (D C) 2
 ;                                     (leaf D 1)      (leaf C 1)
+
+
+#|Exercise 2.68
+The encode procedure takes as arguments a message and a tree and produces the list of bits that gives the encoded message
+
+encode-symbol is a procedure, which you must write, that returns the list of bits that encodes a given symbol
+according to a given tree. You should design encode-symbol so that it signals an error if the symbol is not
+in the tree at all. Test your procedure by encoding the result you obtained in Exercise 2.67 with the
+sample tree and seeing whether it is the same as the original sample message|#
+
+(define (encode message tree)
+    (if (null? message)
+        '()
+        (append (encode-symbol (car message) tree)
+    (encode (cdr message) tree))))
+
+(define (encode-symbol symbol tree)
+    (if (not (member symbol (symbols tree)))
+        (error "symbol not in tree: ENCODE-SYMBOL" symbol)
+        (cond ((and (leaf? tree) (eq? symbol (symbol-leaf tree))) '())
+              ((member symbol (symbols (left-branch tree)))
+                (cons 0 (encode-symbol symbol (left-branch tree))))
+              (else
+                (cons 1 (encode-symbol symbol (right-branch tree)))))))
+
+;test
+(encode (decode '(0 1 1 0 0 1 0 1 0 1 1 1 0) sample-tree) sample-tree)
+;'(0 1 1 0 0 1 0 1 0 1 1 1 0)
+
+(encode '(D) sample-tree) ;'(1 1 0)
+(encode '(E) sample-tree) ;symbol not in tree: ENCODE-SYMBOL 'E
+
+
+
+
+
 
