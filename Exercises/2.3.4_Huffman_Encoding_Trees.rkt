@@ -125,7 +125,7 @@ sample tree and seeing whether it is the same as the original sample message|#
 (define (encode-symbol symbol tree)
     (if (not (member symbol (symbols tree)))
         (error "symbol not in tree: ENCODE-SYMBOL" symbol)
-        (cond ((and (leaf? tree) (eq? symbol (symbol-leaf tree))) '())
+        (cond ((leaf? tree) '())
               ((member symbol (symbols (left-branch tree)))
                 (cons 0 (encode-symbol symbol (left-branch tree))))
               (else
