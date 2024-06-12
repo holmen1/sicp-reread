@@ -157,7 +157,45 @@ only one element left, which is the desired Huffman tree|#
 ;'((leaf A 4) ((leaf B 2) ((leaf C 1) (leaf D 1) (C D) 2) (B C D) 4) (A B C D) 8)
 
 
+#|Exercise 2.70
+The following eight-symbol alphabet with associated relative frequencies was designed to efficiently
+encode the lyrics of 1950s rock songs.
 
+A 2 GET 2 SHA 3 WAH 1
+BOOM 1 JOB 2 NA 16 YIP 9
+
+Use generate-huffman-tree (Exercise 2.69) to generate a corresponding Huffman tree, and use encode
+(Exercise 2.68) to encode the following message|#
+
+(define song
+    (map string->symbol
+        (map string-upcase
+            (map symbol->string
+                '(Get a job
+                Sha na na na na na na na na
+                Get a job
+                Sha na na na na na na na na
+                Wah yip yip yip yip yip yip yip yip yip
+                Sha boom)))))
+
+(define alphabet '((A 2) (GET 2) (SHA 3) (WAH 1) (BOOM 1) (JOB 2) (NA 16) (YIP 9)))
+
+(define rock-tree (generate-huffman-tree alphabet))
+
+(encode song rock-tree)
+;'(1 1 1 1 0 1 1 1 0 1 1 1 1 1 0 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 0 1 1 1 0 1 1 1 1 1 0 1 1 0 0 0 0 0 0 0 0 0 1 1 1 1 1 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1 1 0 1 1 1 1 1 1 1)
+
+(length (encode song rock-tree)) ;87
+
+(/ (length (encode song rock-tree))
+   (* (length song)
+       (/ (log 8) (log 2))))
+;0.8055555555555556
+
+;test
+(decode (encode song rock-tree)
+        rock-tree)
+;'(GET A JOB SHA NA NA NA NA NA NA NA NA GET A JOB SHA NA NA NA NA NA NA NA NA WAH YIP YIP YIP YIP YIP YIP YIP YIP YIP SHA BOOM)
 
 
 
