@@ -73,7 +73,7 @@ of the entire tree.  |#
           (else (cons (car set)
     (adjoin-set x (cdr set))))))
 
-#| ;; Ordered leaf set
+;; Ordered leaf set
 ;The following procedure takes a list of symbol-frequency pairs and constructs an initial ordered
 ;set of leaves, ready to be merged according to the Huffman algorithm
 (define (make-leaf-set pairs)
@@ -85,7 +85,7 @@ of the entire tree.  |#
                         (make-leaf-set (cdr pairs))))))
 ;test
 (make-leaf-set '((A 4) (B 2) (C 1) (D 1))) 
-;'((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4)) |#
+;'((leaf D 1) (leaf C 1) (leaf B 2) (leaf A 4))
 
 
 #|Exercise 2.67
@@ -132,11 +132,30 @@ sample tree and seeing whether it is the same as the original sample message|#
                 (cons 1 (encode-symbol symbol (right-branch tree)))))))
 
 ;test
-(encode (decode '(0 1 1 0 0 1 0 1 0 1 1 1 0) sample-tree) sample-tree)
-;'(0 1 1 0 0 1 0 1 0 1 1 1 0)
+(decode (encode '(A D A B B C A) sample-tree) sample-tree) ;'(A D A B B C A)
 
 (encode '(D) sample-tree) ;'(1 1 0)
-(encode '(E) sample-tree) ;symbol not in tree: ENCODE-SYMBOL 'E
+;(encode '(E) sample-tree) ;symbol not in tree: ENCODE-SYMBOL 'E
+
+
+#|Exercise 2.69
+The following procedure takes as its argument a list of distinct symbol-frequency pairs and generates
+a Huffman encoding tree according to the Huffman algorithm. successive-merge is the procedure you must
+write, using make-code-tree to successively merge the smallest-weight elements of the set until there is
+only one element left, which is the desired Huffman tree|#
+
+(define (generate-huffman-tree pairs)
+    (successive-merge (make-leaf-set pairs)))
+
+(define (successive-merge leaves)
+    (foldl (lambda (x tree) (make-code-tree x tree))
+           (car leaves)
+           (cdr leaves)))
+
+;test
+(generate-huffman-tree '((A 4) (B 2) (C 1) (D 1)))
+;'((leaf A 4) ((leaf B 2) ((leaf C 1) (leaf D 1) (C D) 2) (B C D) 4) (A B C D) 8)
+
 
 
 
