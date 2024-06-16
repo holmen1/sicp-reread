@@ -1,5 +1,82 @@
 #lang racket
 
+#|As an example, compare the
+length procedure of Section 2.2.1 with the count-leaves procedure,
+which returns the total number of leaves of a tree:|#
+
+(define (count-leaves x)
+  (cond ((null? x) 0)
+        ((not (pair? x)) 1)
+        (else (+ (count-leaves (car x))
+                 (count-leaves (cdr x))))))
+
+; test
+(define x (cons (list 1 2) (list 3 4)))
+(length x) ;3
+(count-leaves x) ;4
+(list x x) ;(((1 2) 3 4) ((1 2) 3 4))
+(length (list x x)) ;2
+(count-leaves (list x x)) ;8
+
+
+#|Exercise 2.25
+Give combinations of cars and cdrs that
+will pick 7 from each of the following lists:
+(1 3 (5 7) 9)
+((7))
+(1 (2 (3 (4 (5 (6 7))))))|#
+
+(define l1 (list 1 3 (list 5 7) 9))
+(define l2 (list (list 7)))
+(define l3 (list 1 (list 2 (list 3 (list 4 (list 5 (list 6 7)))))))
+
+(car (cdr (car (cdr (cdr l1))))) ;7
+(car (car l2)) ;7
+(car (cdr (cadr (cadr (cadr (cadr (cadr l3))))))) ;7
+
+
+
+#| Exercise 2.27
+Modify your reverse procedure of Exercise
+2.18 to produce a deep-reverse procedure that takes a list
+as argument and returns as its value the list with its ele-
+ments reversed and with all sublists deep-reversed as well.
+For example,
+(define x (list (list 1 2) (list 3 4)))
+x
+((1 2) (3 4))
+(reverse x)
+((3 4) (1 2))
+(deep-reverse x)
+((4 3) (2 1))
+|#
+
+;; Here's reverse for reference:
+(define (reverse2 items)
+  (define (rev-imp items result)
+    (if (null? items)
+        result
+        (rev-imp (cdr items) (cons (car items) result))))
+  (rev-imp items null))
+
+
+(define (deep-reverse items)
+  (define (iter l res)
+    (cond ((null? l) res)
+          ((pair? (car l))
+           (iter (cdr l)
+                 (cons (deep-reverse (car l))
+                       res)))
+          (else (iter (cdr l)
+                      (cons (car l)
+                            res)))))
+  (iter items null))
+
+(define y (list (list 1 2) (list 3 4))) ; '((1 2) (3 4))
+
+(reverse y) ;'((3 4) (1 2))
+(deep-reverse y) ;'((4 3) (2 1))
+
 
 
 #| Exercise 2.28
