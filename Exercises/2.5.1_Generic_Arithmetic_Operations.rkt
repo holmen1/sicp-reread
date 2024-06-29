@@ -103,6 +103,10 @@
     (lambda (x y) (tag (div-rat x y))))
   (put 'make 'rational
     (lambda (n d) (tag (make-rat n d))))
+  (put 'numer 'rational
+    (lambda (x) (numer x)))
+  (put 'denom 'rational
+    (lambda (x) (denom x)))
   'done)
 
 (define (make-rational n d)
@@ -246,3 +250,79 @@ whose car is the symbol scheme-number|#
 (attach-tag 'scheme-number 1) ;1
 (type-tag 1) ;'scheme-number
 (add-scheme-number (make-scheme-number 5) (make-scheme-number 6)) ;11
+
+
+#|Exercise 2.79
+Define a generic equality predicate equ? that tests the equality of two numbers, and install it in
+the generic arithmetic package. This operation should work for ordinary numbers, rational numbers, and complex numbers|#
+
+(define (equ? x y) (apply-generic 'equ? x y))
+
+(define (install-arithmetic-package)
+  ;; internal procedures
+   (define (numer x) ((get 'numer 'rational) x)) 
+   (define (denom x) ((get 'denom 'rational) x))
+   (define (real z) ((get 'real-part '(complex)) z)) 
+   (define (imag z) ((get 'imag-part '(complex)) z)) 
+  ;; interface to rest of the system
+  (put 'equ? '(scheme-number scheme-number) =)
+  (put 'equ? '(rational rational)
+    (lambda (x y) (and (= (numer x) (numer y))
+                       (= (denom x) (denom y)))))
+  (put 'equ? '(complex complex)
+    (lambda (x y) (and (= (real x) (real y))
+                       (= (imag x) (imag y)))))                
+  'done)
+
+(install-arithmetic-package)
+
+;; display hash for debug
+(for-each (lambda (pair)
+            (printf "~a\n" pair))
+          (hash->list operations))
+; ((imag-part (polar)) . #<procedure:imag-part>)
+; ((numer rational) . #<procedure:...etic_Operations.rkt:107:4>)
+; ((imag-part (rectangular)) . #<procedure:imag-part>)
+; ((real-part (rectangular)) . #<procedure:real-part>)
+; ((sub (complex complex)) . #<procedure:...etic_Operations.rkt:204:4>)
+; ((add (scheme-number scheme-number)) . #<procedure:...etic_Operations.rkt:49:7>)
+; ((magnitude (complex)) . #<procedure:magnitude>)
+; ((mul (scheme-number scheme-number)) . #<procedure:...etic_Operations.rkt:53:7>)
+; ((real-part (complex)) . #<procedure:real-part>)
+; ((add (rational rational)) . #<procedure:...etic_Operations.rkt:97:4>)
+; ((equ? (complex complex)) . #<procedure:...etic_Operations.rkt:274:4>)
+; ((equ? (rational rational)) . #<procedure:...etic_Operations.rkt:271:4>)
+; ((equ? (scheme-number scheme-number)) . #<procedure:=>)
+; ((sub (rational rational)) . #<procedure:...etic_Operations.rkt:99:4>)
+; ((mul (complex complex)) . #<procedure:...etic_Operations.rkt:206:4>)
+; ((real-part (polar)) . #<procedure:real-part>)
+; ((add (complex complex)) . #<procedure:...etic_Operations.rkt:202:4>)
+; ((angle (polar)) . #<procedure:angle>)
+; ((div (rational rational)) . #<procedure:...etic_Operations.rkt:103:4>)
+; ((div (complex complex)) . #<procedure:...etic_Operations.rkt:208:4>)
+; ((angle (complex)) . #<procedure:angle>)
+; ((make-from-mag-ang rectangular) . #<procedure:...etic_Operations.rkt:154:4>)
+; ((make-from-real-imag rectangular) . #<procedure:...etic_Operations.rkt:152:4>)
+; ((make-from-mag-ang complex) . #<procedure:...etic_Operations.rkt:212:4>)
+; ((mul (rational rational)) . #<procedure:...etic_Operations.rkt:101:4>)
+; ((make-from-real-imag complex) . #<procedure:...etic_Operations.rkt:210:4>)
+; ((imag-part (complex)) . #<procedure:imag-part>)
+; ((denom rational) . #<procedure:...etic_Operations.rkt:109:4>)
+; ((make-from-mag-ang polar) . #<procedure:...etic_Operations.rkt:177:4>)
+; ((magnitude (polar)) . #<procedure:magnitude>)
+; ((magnitude (rectangular)) . #<procedure:magnitude>)
+; ((angle (rectangular)) . #<procedure:angle>)
+; ((make scheme-number) . #<procedure:...etic_Operations.rkt:56:28>)
+; ((make rational) . #<procedure:...etic_Operations.rkt:105:4>)
+; ((sub (scheme-number scheme-number)) . #<procedure:...etic_Operations.rkt:51:7>)
+; ((div (scheme-number scheme-number)) . #<procedure:...etic_Operations.rkt:55:7>)
+; ((make-from-real-imag polar) . #<procedure:...etic_Operations.rkt:175:4>)
+
+(equ? (make-scheme-number 5) (make-scheme-number 6)) ;#f
+(equ? (make-scheme-number 5) (make-scheme-number 5)) ;#t
+(equ? (make-rational 1 3) (make-rational 2 3)) ;#f
+(equ? (make-rational 1 3) (make-rational 1 3)) ;#t
+(equ? (make-complex-from-real-imag 1 3)
+      (make-complex-from-real-imag 2 3)) ;#f
+(equ? (make-complex-from-real-imag 1 3)
+      (make-complex-from-real-imag 1 3)) ;#t
