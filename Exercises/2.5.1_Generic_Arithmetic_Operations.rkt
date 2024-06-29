@@ -26,19 +26,21 @@
 
 ;; Define a function to attach a type tag to a value
 (define (attach-tag type-tag contents)
-  (cons type-tag contents))
+  (if (eq? type-tag 'scheme-number)
+    contents
+    (cons type-tag contents)))
 
 ;; Define a function to retrieve the type tag from a tagged datum
 (define (type-tag datum)
-  (if (pair? datum)
-    (car datum)
-    (error "Bad tagged datum: TYPE-TAG" datum)))
+  (cond ((pair? datum) (car datum))
+        ((number? datum) 'scheme-number)
+        (else (error "Bad tagged datum: TYPE-TAG" datum))))
 
 ;; Define a function to retrieve the contents from a tagged datum
 (define (contents datum)
-  (if (pair? datum)
-    (cdr datum)
-    (error "Bad tagged datum: CONTENTS" datum)))
+  (cond ((pair? datum) (cdr datum))
+        ((number? datum) datum)
+        (else (error "Bad tagged datum: CONTENTS" datum))))
 
 ;; scheme-number package
 (define (install-scheme-number-package)
@@ -231,3 +233,16 @@
 
 (add-complex (make-complex-from-real-imag 1 3)
              (make-complex-from-real-imag 2 3)) ;'(complex rectangular 3 . 6)
+
+
+#|Exercise 2.78:
+In fact, however, all Lisp implementations do have a type system, which they use internally.
+Primitive predicates such as symbol? and number? determine whether data objects have particular types.
+Modify the definitions of type-tag, contents, and attach-tag from Section 2.4.2 so that our generic
+system takes advantage of Scheme’s internal type system. That is to say, the system should work as
+before except that ordinary numbers should be represented simply as Scheme numbers rather than as pairs
+whose car is the symbol scheme-number|#
+
+(attach-tag 'scheme-number 1) ;1
+(type-tag 1) ;'scheme-number
+(add-scheme-number (make-scheme-number 5) (make-scheme-number 6)) ;11
