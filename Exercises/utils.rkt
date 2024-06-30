@@ -1,6 +1,6 @@
 #lang racket
 
-(provide attach-tag put get apply-generic type-tag contents)
+(provide attach-tag operations put get apply-generic type-tag contents)
 
 ;; Define a hash table to store the operations
 (define operations (make-hash))
