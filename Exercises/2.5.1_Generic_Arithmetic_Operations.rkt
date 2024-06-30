@@ -257,6 +257,7 @@ Define a generic equality predicate equ? that tests the equality of two numbers,
 the generic arithmetic package. This operation should work for ordinary numbers, rational numbers, and complex numbers|#
 
 (define (equ? x y) (apply-generic 'equ? x y))
+(define (=zero? x) (apply-generic '=zero? x))
 
 (define (install-arithmetic-package)
   ;; internal procedures
@@ -271,7 +272,14 @@ the generic arithmetic package. This operation should work for ordinary numbers,
                        (= (denom x) (denom y)))))
   (put 'equ? '(complex complex)
     (lambda (x y) (and (= (real x) (real y))
-                       (= (imag x) (imag y)))))                
+                       (= (imag x) (imag y)))))
+  (put '=zero? '(scheme-number)
+    (lambda (x) (= x 0)))
+  (put '=zero? '(rational)
+    (lambda (x) (= 0 (numer x))))
+  (put '=zero? '(complex)
+    (lambda (x) (and (= (real x) 0)
+                     (= (imag x) 0))))       
   'done)
 
 (install-arithmetic-package)
@@ -326,3 +334,15 @@ the generic arithmetic package. This operation should work for ordinary numbers,
       (make-complex-from-real-imag 2 3)) ;#f
 (equ? (make-complex-from-real-imag 1 3)
       (make-complex-from-real-imag 1 3)) ;#t
+
+
+#|Exercise 2.80
+Define a generic predicate =zero? that tests if its argument is zero, and install it in the generic
+arithmetic package. This operation should work for ordinary numbers, rational numbers, and complex numbers|#
+
+(=zero? (make-scheme-number 5)) ;#f
+(=zero? (make-scheme-number 0)) ;#t
+(=zero? (make-rational 0 3)) ;#t
+(=zero? (make-rational 1 3)) ;#f
+(=zero? (make-complex-from-real-imag 1 3)) ;#f
+(=zero? (make-complex-from-real-imag 0 0)) ;#t
