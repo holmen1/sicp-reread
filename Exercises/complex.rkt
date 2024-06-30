@@ -1,6 +1,7 @@
 #lang racket
 
 (require "utils.rkt")
+(require "arithmetic_operations.rkt") ;; LL otherwise built-in procedures are used (magnitude, real-part, imag-part, angle)
 (provide install-complex-package make-complex-from-real-imag make-complex-from-mag-ang
 install-rectangular-package install-polar-package)
 
@@ -61,8 +62,8 @@ install-rectangular-package install-polar-package)
   'done)
 
 (define (install-complex-package)
-  ; (install-rectangular-package)
-  ; (install-polar-package)
+  (install-rectangular-package)
+  (install-polar-package)
   ;; imported procedures from rectangular and polar packages
   (define (make-from-real-imag x y)
     ((get 'make-from-real-imag 'rectangular) x y))
@@ -98,5 +99,11 @@ install-rectangular-package install-polar-package)
   (put 'real-part '(complex) real-part)
   (put 'imag-part '(complex) imag-part)
   (put 'magnitude '(complex) magnitude)
-  (put 'angle '(complex) angle))
+  (put 'angle '(complex) angle)
+    (put 'equ? '(complex complex)
+    (lambda (x y) (and (= (real-part x) (real-part y))
+                       (= (imag-part x) (imag-part y)))))
+  (put '=zero? '(complex)
+    (lambda (x) (and (= (real-part x) 0)
+                     (= (imag-part x) 0)))) )
 

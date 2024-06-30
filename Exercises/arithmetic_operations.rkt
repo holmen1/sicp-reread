@@ -1,7 +1,16 @@
 #lang racket
 
 (require "utils.rkt")
-(provide add sub mul div equ? =zero? real-part imag-part magnitude angle)
+(provide apply-generic add sub mul div equ? =zero? real-part imag-part magnitude angle)
+
+;; Define a generic function to apply an operation to multiple arguments
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+        (apply proc (map contents args))
+        (error "No method for these types: APPLY-GENERIC"
+                (list op type-tags))))))
 
 ;; Define specific arithmetic operations using the generic apply-generic function
 (define (add x y) (apply-generic 'add x y))

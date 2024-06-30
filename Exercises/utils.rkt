@@ -1,6 +1,6 @@
 #lang racket
 
-(provide attach-tag operations put get apply-generic type-tag contents)
+(provide attach-tag operations put get type-tag contents)
 
 ;; Define a hash table to store the operations
 (define operations (make-hash))
@@ -10,14 +10,14 @@
     (hash-ref operations (list key1 key2)
                          (lambda () (error "Key not found" (list key1 key2)))))
 
-;; Define a generic function to apply an operation to multiple arguments
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-        (apply proc (map contents args))
-        (error "No method for these types: APPLY-GENERIC"
-                (list op type-tags))))))
+; ;; Define a generic function to apply an operation to multiple arguments
+; (define (apply-generic op . args)
+;   (let ((type-tags (map type-tag args)))
+;     (let ((proc (get op type-tags)))
+;       (if proc
+;         (apply proc (map contents args))
+;         (error "No method for these types: APPLY-GENERIC"
+;                 (list op type-tags))))))
 
 ;; Define a function to attach a type tag to a value
 (define (attach-tag type-tag contents)
