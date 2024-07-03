@@ -25,3 +25,6 @@
 (add '(polynomial x (2 0) (1 1) (0 6)) '(polynomial x (2 0) (1 1) (0 6))) ;'(polynomial x (1 2) (0 12))
 
 (mul '(polynomial x (2 2) (1 1) (0 6)) '(polynomial x (2 0) (1 1) (0 3))) ;'(polynomial x (3 2) (2 7) (1 9) (0 18))
+
+(sub '(polynomial x (2 0) (1 1) (0 6)) '(polynomial x (2 0) (1 1) (0 6))) ;'(polynomial x)
+(sub '(polynomial x (2 2) (1 2) (0 6)) '(polynomial x (2 2) (1 1) (0 6))) ;'(polynomial x (1 1))
