@@ -44,3 +44,14 @@ mf returns the result of calling f on that input and increments the counter|#
 (s 100) ;=> 10
 (s 'how-many-calls?) ;=> 1
 
+(define sinus (make-monitored sin))
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> 0
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> 0.7071067811865475
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> 1.0
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> 0.7071067811865476
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> 1.2246467991473532e-16
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> -0.7071067811865475
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> -1.0
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> -0.7071067811865477
+(sinus (* (/ pi 4) (sinus 'how-many-calls?))) ;=> -2.4492935982947064e-16
+
