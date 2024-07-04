@@ -1,6 +1,6 @@
 # SICP Rereading
 
-This repository contains my rereading of the book "Structure and Interpretation of Computer Programs" (SICP) and my solutions to the exercises, implemented in Racket
+This repository contains my rereading of the book "Structure and Interpretation of Computer Programs" (SICP) and my solutions to selected exercises, implemented in Racket
 
 
 
