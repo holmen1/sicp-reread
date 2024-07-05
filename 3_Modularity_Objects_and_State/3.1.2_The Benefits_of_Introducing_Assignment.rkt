@@ -75,3 +75,11 @@ Use your estimate-integral to produce an estimate of π by measuring the area of
 
 ;test
 (estimate-integral P -1 1 -1 1 1000000) ;=> 3.147216
+
+
+;; Monte Carlo integration
+
+(define (below-sin x y)
+  (<= y (sin x)))
+
+(estimate-integral below-sin 0 pi 0 1 10000000) ; => 2.000820670810921
