@@ -9,10 +9,19 @@
   (define (deposit amount)
     (set! balance (+ balance amount))
     balance)
+  (define (add-pwd pwd)
+    (set! password (cons pwd
+                         password)))
+  (define (authenticate pwd)
+    (if (not (pair? password))
+      (eq? pwd password) 
+      (or (eq? pwd (car password))
+          (eq? pwd (cdr password)))))
   (define (dispatch p m)
-    (if (eq? p password)
+    (if (authenticate p)
       (cond ((eq? m 'withdraw) withdraw)
             ((eq? m 'deposit) deposit)
+            ((eq? m 'add-pwd) add-pwd)
             (else (error "Unknown request: MAKE-ACCOUNT" m)))
       (lambda (dummy) "Incorrect password")))
   dispatch)
@@ -32,5 +41,17 @@ is a bank account with password open-sesame, then
 will allow one to make transactions on peter-acc using the
 name paul-acc and the password rosebud|#
 
+(define (make-joint acc pwd new-pwd)
+  ((acc pwd 'add-pwd) new-pwd)
+  acc)
+
 ;test
 (define peter-acc (make-account 'open-sesame 100))
+((peter-acc 'open-sesame 'withdraw) 10) ;=> 90
+
+(define paul-acc
+  (make-joint peter-acc 'open-sesame 'rosebud))
+
+((paul-acc 'rosebud 'withdraw) 10) ;=> 80
+((peter-acc 'open-sesame 'withdraw) 10) ;=> 70
+((peter-acc 'sesame 'withdraw) 10) ;=> "Incorrect password"
