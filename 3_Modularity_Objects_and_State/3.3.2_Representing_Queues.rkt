@@ -23,6 +23,7 @@
   (set-car! queue item))
 (define (set-rear-ptr! queue item)
   (set-cdr! queue item))
+(define (print-queue queue) (car queue))
 
 ;; Constructor
 (define (make-queue) (cons '() '()))
@@ -42,16 +43,16 @@
     (cond ((empty-queue? queue)
            (set-front-ptr! queue new-pair)
            (set-rear-ptr! queue new-pair)
-           queue)
+           (print-queue queue))
            (else
              (set-cdr! (rear-ptr queue) new-pair)
              (set-rear-ptr! queue new-pair)
-             queue))))
+             (print-queue queue)))))
 
 (define (delete-queue! queue)
   (cond ((empty-queue? queue) (error "DELETE! called with an empty queue" queue))
         (else (set-front-ptr! queue (cdr (front-ptr queue)))
-        queue)))
+        (print-queue queue))))
 
 
 #|Exercise 3.21: Ben Bitdiddle decides to test the queue implementation described above. He types in
@@ -70,3 +71,10 @@ Lisp printer doesn’t know how to make sense of the queue representation. If yo
 printed correctly, you’ll have to define your own print procedure for queues.” Explain what Eva Lu is
 talking about. In particular, show why Ben’s examples produce the printed results that they do.
 Define a procedure print-queue that takes a queue as input and prints the sequence of items in the queue.|#
+
+;test
+(define q2 (make-queue))
+(insert-queue! q2 'a)   ; => (a)
+(insert-queue! q2 'b)   ; => (a b)
+(delete-queue! q2)      ; => (b)
+(delete-queue! q2)      ; => ()
