@@ -7,7 +7,8 @@
     stream-ref
     stream-map
     display-line
-    stream-enumerate-interval)
+    stream-enumerate-interval
+    stream-filter)
 
 
 
