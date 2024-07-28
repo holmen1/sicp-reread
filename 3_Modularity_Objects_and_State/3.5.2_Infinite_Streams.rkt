@@ -45,6 +45,64 @@
 ;; When we evaluate this delayed (fibgen 1 1), it will produce a pair whose car is 1 and whose cdr is
 ;; a promise to evaluate (fibgen 1 2), and so on
 
-(stream-ref fibs 5) ; => 5
-(stream-ref fibs 6) ; => 8
-(stream-ref fibs 7) ; => 13
+(stream-take fibs 7) ; => '(0 1 1 2 3 5 8)
+
+
+;; Sieve of Eratosthenes
+
+(define (sieve stream)
+  (cons-stream (stream-car stream)
+               (sieve (stream-filter
+                        (lambda (x) (not (divisible? x (stream-car stream))))
+                        (stream-cdr stream)))))
+
+(define primes (sieve (integers-starting-from 2)))
+
+(stream-take primes 10) ; => '(2 3 5 7 11 13 17 19 23 29)
+(stream-ref primes 50) ; => 233
+
+
+;; Defining streams implicitly
+
+(define ones (cons-stream 1 ones))
+
+(define (add-streams s1 s2) (stream-map + s1 s2))
+
+(define integers-i
+  (cons-stream 1 (add-streams ones integers-i)))
+(stream-take integers-i 10) ; => '(1 2 3 4 5 6 7 8 9 10)
+
+
+(define fibs-i
+  (cons-stream
+    0
+    (cons-stream 1 (add-streams (stream-cdr fibs-i) fibs-i))))
+(stream-take fibs-i 10) ; => '(0 1 1 2 3 5 8 13 21 34)
+
+
+(define (scale-stream stream factor)
+  (stream-map (lambda (x) (* x factor))
+              stream))
+
+(define double (cons-stream 1 (scale-stream double 2)))
+(stream-take double 6) ; => '(1 2 4 8 16 32)
+
+
+;; Primes implicit
+
+(define primes-i
+  (cons-stream
+  2
+  (stream-filter prime? (integers-starting-from 3))))
+
+(define (prime? n)
+  (define (iter ps)
+    (cond ((> (square (stream-car ps)) n) true)
+          ((divisible? n (stream-car ps)) false)
+          (else (iter (stream-cdr ps)))))
+  (iter primes-i))
+
+(define (square x) (* x x))
+
+(stream-take primes-i 10) ; => '(2 3 5 7 11 13 17 19 23 29)
+(stream-ref primes-i 50) ; => 233
