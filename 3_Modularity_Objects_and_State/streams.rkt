@@ -4,6 +4,7 @@
     cons-stream
     stream-car
     stream-cdr
+    stream-null?
     stream-ref
     stream-map
     display-line
