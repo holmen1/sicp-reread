@@ -1,4 +1,6 @@
-#lang sicp
+#lang racket
+
+(require racket/mpair)
 
 (define apply-in-underlying-scheme apply)
 
@@ -200,12 +202,12 @@
 
 ;; Each frame of an environment is represented as a pair of lists: a list of the variables bound in that frame and a list of the associated values
 (define (make-frame variables values)
-  (cons variables values))
-(define (frame-variables frame) (car frame))
-(define (frame-values frame) (cdr frame))
+  (mcons variables values))
+(define (frame-variables frame) (mcar frame))
+(define (frame-values frame) (mcdr frame))
 (define (add-binding-to-frame! var val frame)
-  (set-car! frame (cons var (car frame)))
-  (set-cdr! frame (cons val (cdr frame))))
+  (set-mcar! frame (cons var (mcar frame)))
+  (set-mcdr! frame (cons val (mcdr frame))))
 
 ;; To extend an environment by a new frame that associates variables with values, we make a frame consisting of the list of variables and the list of values, and we adjoin this to the environment
 (define (extend-environment vars vals base-env)
@@ -235,7 +237,7 @@
     (define (scan vars vals)
       (cond ((null? vars)
              (env-loop (enclosing-environment env)))
-            ((eq? var (car vars)) (set-car! vals val))
+            ((eq? var (car vars)) (set-mcar! vals val))
             (else (scan (cdr vars) (cdr vals)))))
     (if (eq? env the-empty-environment)
         (error "Unbound variable: SET!" var)
@@ -249,7 +251,7 @@
     (define (scan vars vals)
       (cond ((null? vars)
              (add-binding-to-frame! var val frame))
-            ((eq? var (car vars)) (set-car! vals val))
+            ((eq? var (car vars)) (set-mcar! vals val))
             (else (scan (cdr vars) (cdr vals)))))
     (scan (frame-variables frame) (frame-values frame))))
 
