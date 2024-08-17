@@ -28,23 +28,20 @@
                                                 env))
         ((begin? exp)           (eval-sequence (begin-actions exp) env))
         ((cond? exp)            (eval (cond->if exp) env))
+        ((let? exp)             (eval (let->combination exp) env))
         ((application? exp)     (my-apply (eval (operator exp) env)
-                                          (list-of-values (operands exp)
-                                          env)))
+                                          (list-of-values (operands exp) env)))
         (else
          (error "Unknown expression type: EVAL" exp))))
 
 
 (define (my-apply procedure arguments)
-  (cond ((primitive-procedure? procedure)
-         (apply-primitive-procedure procedure arguments))
-        ((compound-procedure? procedure)
-         (eval-sequence
-          (procedure-body procedure)
-          (extend-environment
-           (procedure-parameters procedure)
-           arguments
-           (procedure-environment procedure))))
+  (cond ((primitive-procedure? procedure) (apply-primitive-procedure procedure arguments))
+        ((compound-procedure? procedure)  (eval-sequence (procedure-body procedure)
+                                                         (extend-environment
+                                                          (procedure-parameters procedure)
+                                                          arguments
+                                                          (procedure-environment procedure))))
         (else
          (error "Unknown procedure type: APPLY" procedure))))
 
@@ -160,7 +157,6 @@
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
-;and
 (define (and? exp) (tagged-list? exp 'and))
 (define (or? exp) (tagged-list? exp 'or))
 
@@ -210,6 +206,27 @@
             (make-if (cond-predicate first)
                      (sequence->exp (cond-actions first))
                      (expand-clauses rest))))))
+
+(define (let? exp) (tagged-list? exp 'let))
+(define (let-variables exp)
+  (define (iter lets)
+    (if (null? lets)
+      '()
+      (cons (caar lets)
+            (iter (cdr lets)))))
+  (iter (cadr exp)))
+(define (let-expressions exp)
+  (define (iter lets)
+    (if (null? lets)
+      '()
+      (cons (cadar lets)
+            (iter (cdr lets)))))
+  (iter (cadr exp)))
+(define (let-body exp) (cddr exp))
+(define (let->combination exp)
+  (cons (make-lambda (let-variables exp)
+                     (let-body exp))
+        (let-expressions exp)))
 
 
 #|  Evaluator Data Structures   |#

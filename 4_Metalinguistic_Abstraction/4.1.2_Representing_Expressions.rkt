@@ -28,3 +28,26 @@ evaluation procedures eval-and and eval-or|#
 (eval '(and) e0) ;=> #t
 
 
+#|Exercise 4.6
+let expressions are derived expressions, because
+
+(let ((⟨var1⟩ ⟨exp1⟩) . . . (⟨varn⟩ ⟨expn⟩))
+  ⟨body⟩)
+
+is equivalent to
+
+((lambda (⟨var1⟩ . . . ⟨varn⟩)
+    ⟨body⟩)
+  ⟨exp1⟩
+  . . .
+  ⟨expn⟩)
+
+Implement a syntactic transformation let->combination that reduces evaluating let expressions to evaluating
+combinations of the type shown above, and add the appropriate clause to eval to handle let expressions|#
+
+;test
+(eval '(define (add x y)
+         (let ((a x) (b y)) (+ a b))) e0) ;=> ok
+(eval '(add 1 2) e0) ;=> 3
+
+
