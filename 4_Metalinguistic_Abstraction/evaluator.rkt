@@ -8,6 +8,12 @@
 
 (define apply-in-underlying-scheme apply)
 
+
+; In the environment model of evaluation, a procedure is always a pair consisting of some code and a pointer
+; to an environment. Procedures are created in one way only: by evaluating a λ-expression.
+; This produces a procedure whose code is obtained from the text of the λ-expression and whose environment
+; is the environment in which the λ-expression was evaluated to produce the procedure. 
+
 (define (eval exp env)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp) (lookup-variable-value exp env))
@@ -46,9 +52,9 @@
 (define (list-of-values exps env)
   (if (no-operands? exps)
       '()
-      (cons (eval (first-operand exps) env)
-            (list-of-values (rest-operands exps) env))))
-
+      (let ((left (eval (first-operand exps) env))) ;Ex4.1 left to right
+        (cons left
+              (list-of-values (rest-operands exps) env)))))
 
 ;; Conditionals
 (define (eval-if exp env)
@@ -151,7 +157,7 @@
         (else (make-begin seq))))
 (define (make-begin seq) (cons 'begin seq))
 
-;; A procedure application is any compound expression that is not one of the above expression types. e car of the expression is the operator, and the cdr is the list of operands:
+;; A procedure application is any compound expression that is not one of the above expression types. The car of the expression is the operator, and the cdr is the list of operands:
 (define (application? exp) (pair? exp))
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
@@ -198,7 +204,7 @@
 (define (procedure-environment p) (cadddr p))
 
 
-;; Operations on Environments
+#|  Environments  |#
 
 (define (enclosing-environment env) (cdr env))
 (define (first-frame env) (car env))
@@ -284,6 +290,7 @@
         (list 'null? null?)
         (list '+ +)
         (list '- -)
+        (list 'display display)
         ;⟨more primitives⟩
         ))
 (define (primitive-procedure-names)
