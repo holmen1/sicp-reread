@@ -21,6 +21,8 @@
         ((assignment? exp) (eval-assignment exp env))
         ((definition? exp) (eval-definition exp env))
         ((if? exp) (eval-if exp env))
+        ((and? exp) (eval-and exp env))
+        ((or? exp) (eval-or exp env))
         ((lambda? exp) (make-procedure (lambda-parameters exp)
                                        (lambda-body exp)
                                        env))
@@ -62,7 +64,22 @@
       (eval (if-consequent exp) env)
       (eval (if-alternative exp) env)))
 
+;; Booleans
+(define (eval-and exp env)
+  (define (iter preds)
+    (cond ((null? preds) true)
+          ((true? (eval (car preds) env)) (iter (cdr preds)))
+          (else
+            false)))
+  (iter (cdr exp)))
 
+(define (eval-or exp env)
+  (define (iter preds)
+    (cond ((null? preds) false)
+          ((true? (eval (car preds) env)) true)
+          (else
+            (iter (cdr preds)))))
+  (iter (cdr exp)))
 
 ;; Sequences
 (define (eval-sequence exps env)
@@ -96,6 +113,7 @@
 
 (define (variable? exp) (symbol? exp))
 
+; Quotations have the form (quote ⟨text-of-quotation⟩)
 (define (quoted? exp) (tagged-list? exp 'quote))
 (define (text-of-quotation exp) (cadr exp))
 
@@ -104,10 +122,14 @@
       (eq? (car exp) tag)
       false))
 
+; Assignments have the form (set! ⟨var⟩ ⟨value⟩)
 (define (assignment? exp) (tagged-list? exp 'set!))
 (define (assignment-variable exp) (cadr exp))
 (define (assignment-value exp) (caddr exp))
 
+; Definitions have the form (define ⟨var⟩ ⟨value⟩) or the form
+; (define (⟨var⟩ ⟨parameter1⟩ . . . ⟨parametern⟩)
+;    ⟨body⟩)
 (define (definition? exp) (tagged-list? exp 'define))
 (define (definition-variable exp)
   (if (symbol? (cadr exp))
@@ -119,7 +141,6 @@
       (make-lambda (cdadr exp)      ; formal parameters
                    (cddr exp))))    ; body
 
-
 ;; lambda expressions are lists that begin with the symbol lambda:
 (define (lambda? exp) (tagged-list? exp 'lambda))
 (define (lambda-parameters exp) (cadr exp))
@@ -128,8 +149,7 @@
 (define (make-lambda parameters body)
   (cons 'lambda (cons parameters body)))
 
-
-;; if
+; Conditionals begin with if and have a predicate, a consequent, and an (optional) alternative. If the expression has no alternative part, we provide false as the alternative
 (define (if? exp) (tagged-list? exp 'if))
 (define (if-predicate exp) (cadr exp))
 (define (if-consequent exp) (caddr exp))
@@ -137,27 +157,29 @@
   (if (not (null? (cdddr exp)))
       (cadddr exp)
       'false))
-
+; to be used by cond->if to transform cond expressions into if expressions
 (define (make-if predicate consequent alternative)
   (list 'if predicate consequent alternative))
 
+;and
+(define (and? exp) (tagged-list? exp 'and))
+(define (or? exp) (tagged-list? exp 'or))
 
-;; begin
+; begin packages a sequence of expressions into a single expression
 (define (begin? exp) (tagged-list? exp 'begin))
 (define (begin-actions exp) (cdr exp))
-
 (define (last-exp? seq) (null? (cdr seq)))
 (define (first-exp seq) (car seq))
 (define (rest-exps seq) (cdr seq))
 
-
+; We also include a constructor sequence->exp (for use by cond->if) that transforms a sequence into a single expression
 (define (sequence->exp seq)
   (cond ((null? seq) seq)
         ((last-exp? seq) (first-exp seq))
         (else (make-begin seq))))
 (define (make-begin seq) (cons 'begin seq))
 
-;; A procedure application is any compound expression that is not one of the above expression types. The car of the expression is the operator, and the cdr is the list of operands:
+; A procedure application is any compound expression that is not one of the above expression types. The car of the expression is the operator, and the cdr is the list of operands:
 (define (application? exp) (pair? exp))
 (define (operator exp) (car exp))
 (define (operands exp) (cdr exp))
@@ -165,6 +187,8 @@
 (define (first-operand ops) (car ops))
 (define (rest-operands ops) (cdr ops))
 
+
+#|  Derived expressions |#
 
 ;; We include syntax procedures that extract the parts of a cond expression, and a procedure cond->if that transforms cond expressions into if expressions
 (define (cond? exp) (tagged-list? exp 'cond))
