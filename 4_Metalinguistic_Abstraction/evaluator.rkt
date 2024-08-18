@@ -15,6 +15,7 @@
 ; is the environment in which the λ-expression was evaluated to produce the procedure. 
 
 (define (eval exp env)
+  ;(display exp) (newline)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp)        (lookup-variable-value exp env))
         ((quoted? exp)          (text-of-quotation exp))
@@ -141,7 +142,6 @@
 (define (lambda? exp) (tagged-list? exp 'lambda))
 (define (lambda-parameters exp) (cadr exp))
 (define (lambda-body exp) (cddr exp))
-
 (define (make-lambda parameters body)
   (cons 'lambda (cons parameters body)))
 
@@ -207,6 +207,8 @@
                      (sequence->exp (cond-actions first))
                      (expand-clauses rest))))))
 
+;; (let ((v1 e1) ... (vn en)) ⟨body⟩) = ((lambda (v1 ... vn) ⟨body⟩) e1 ... en) or
+;; (let name ((v1 e1) ... (vn en)) ⟨body⟩)
 (define (let? exp) (tagged-list? exp 'let))
 (define (let-variables exp)
   (define (iter lets)
@@ -223,10 +225,32 @@
             (iter (cdr lets)))))
   (iter (cadr exp)))
 (define (let-body exp) (cddr exp))
+
+(define (named-let? exp) (and (tagged-list? exp 'let)
+                              (symbol? (cadr exp))))
+(define (named-let-name exp) (cadr exp))
+(define (named-let-variables exp)
+  (map car (caddr exp)))
+(define (named-let-expressions exp)
+  (map cadr (caddr exp)))
+(define (named-let-body exp) (cdddr exp))
+(define (named-let->combination exp)
+  (make-begin
+    (list
+      (list 'define
+            (named-let-name exp)
+            (make-lambda (named-let-variables exp)
+                        (named-let-body exp)))
+      (cons (named-let-name exp) (named-let-expressions exp)))))
+        
+
+
 (define (let->combination exp)
-  (cons (make-lambda (let-variables exp)
-                     (let-body exp))
-        (let-expressions exp)))
+  (if (named-let? exp)
+    (named-let->combination exp)
+    (cons (make-lambda (let-variables exp)
+                      (let-body exp))
+          (let-expressions exp))))
 
 
 #|  Evaluator Data Structures   |#
@@ -330,6 +354,7 @@
         (list 'null? null?)
         (list '+ +)
         (list '- -)
+        (list '= =)
         (list 'display display)
         ;⟨more primitives⟩
         ))

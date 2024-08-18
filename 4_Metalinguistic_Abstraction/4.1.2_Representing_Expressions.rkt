@@ -51,3 +51,43 @@ combinations of the type shown above, and add the appropriate clause to eval to 
 (eval '(add 1 2) e0) ;=> 3
 
 
+#|Exercise 4.8
+“Named let” is a variant of let that has the form (let ⟨var⟩ ⟨bindings⟩ ⟨body⟩)
+The ⟨bindings⟩ and ⟨body⟩ are just as in ordinary let, except that ⟨var⟩ is bound within ⟨body⟩
+to a procedure whose body is ⟨body⟩ and whose parameters are the variables in the ⟨bindings⟩.
+Thus, one can repeatedly execute the ⟨body⟩ by invoking the procedure named ⟨var⟩. For example,
+the iterative Fibonacci procedure (Section 1.2.2) can be rewritten using named let as follows:
+
+(define (fib n)
+  (let fib-iter ((a 1) (b 0) (count n))
+    (if (= count 0)
+      b
+      (fib-iter (+ a b) a (- count 1)))))
+
+Modify let->combination of Exercise 4.6 to also support named let|#
+
+;test
+(eval '(define (fib n)
+        (let fib-iter ((a 1) (b 0) (count n))
+            (if (= count 0)
+                b
+                (fib-iter (+ a b) a (- count 1))))) e0) ;=> ok
+(eval '(fib 6) e0) ;=> 8
+
+
+#|Exercise 4.9
+Many languages support a variety of iteration constructs, such as do, for, while, and until.
+In Scheme, iterative processes can be expressed in terms of ordinary procedure calls,
+so special iteration constructs provide no essential gain in computational power.
+On the other hand, such constructs are often convenient. Design some iteration constructs,
+give examples of their use, and show how to implement them as derived expressions|#
+
+;test
+; (eval '(define items (cons 57 (cons 321 (cons 88 '())))) e0)
+; (eval '(for (lambda (x)
+;               (newline)
+;               (display x))
+;             items)
+;         e0)
+
+
