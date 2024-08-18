@@ -207,8 +207,10 @@
                      (sequence->exp (cond-actions first))
                      (expand-clauses rest))))))
 
+;; Transforms let:
 ;; (let ((v1 e1) ... (vn en)) ⟨body⟩) = ((lambda (v1 ... vn) ⟨body⟩) e1 ... en) or
-;; (let name ((v1 e1) ... (vn en)) ⟨body⟩)
+;; (let name ((v1 e1) ... (vn en)) ⟨body⟩) = (begin (define name (lambda (v1 ... vn) ⟨body⟩)) (name e1 ... en))
+;; Note that name is bound within ⟨body⟩ to a procedure whose body is ⟨body⟩ and whose parameters are the variables in ((v1 e1) ... (vn en))
 (define (let? exp) (tagged-list? exp 'let))
 (define (let-variables exp)
   (define (iter lets)
@@ -243,8 +245,6 @@
                         (named-let-body exp)))
       (cons (named-let-name exp) (named-let-expressions exp)))))
         
-
-
 (define (let->combination exp)
   (if (named-let? exp)
     (named-let->combination exp)
@@ -341,7 +341,6 @@
     (define-variable! 'true true initial-env)
     (define-variable! 'false false initial-env)
     initial-env))
-;(define the-global-environment (setup-environment))
 
 (define (primitive-procedure? proc)
   (tagged-list? proc 'primitive))
@@ -355,7 +354,7 @@
         (list '+ +)
         (list '- -)
         (list '= =)
-        (list 'display display)
+        (list 'display display) ; for debug
         ;⟨more primitives⟩
         ))
 (define (primitive-procedure-names)

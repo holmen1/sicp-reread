@@ -66,6 +66,10 @@ the iterative Fibonacci procedure (Section 1.2.2) can be rewritten using named l
 
 Modify let->combination of Exercise 4.6 to also support named let|#
 
+
+;(let fib-iter ((a 1) (b 0) (count n)) (if (= count 0) b (fib-iter (+ a b) a (- count 1))))
+;(begin (define fib-iter (lambda (a b count) (if (= count 0) b (fib-iter (+ a b) a (- count 1))))) (fib-iter 1 0 n))
+
 ;test
 (eval '(define (fib n)
         (let fib-iter ((a 1) (b 0) (count n))
@@ -73,6 +77,26 @@ Modify let->combination of Exercise 4.6 to also support named let|#
                 b
                 (fib-iter (+ a b) a (- count 1))))) e0) ;=> ok
 (eval '(fib 6) e0) ;=> 8
+
+
+;; Original Scheme, showing both versions:
+(define fib
+  (lambda (n)
+    (begin (define fib-iter 
+             (lambda (a b count)
+               (if (= count 0)
+                   b
+                   (fib-iter (+ a b) a (- count 1)))))
+           (fib-iter 1 0 n))))
+
+(define (fib-derived n)
+  (let fib-iter ((a 1) (b 0) (count n))
+    (if (= count 0)
+        b
+        (fib-iter (+ a b) a (- count 1)))))
+
+(fib 120)           ;5358359254990966640871840
+(fib-derived 120)   ;5358359254990966640871840
 
 
 #|Exercise 4.9
