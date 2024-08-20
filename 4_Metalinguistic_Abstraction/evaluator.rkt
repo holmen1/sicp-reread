@@ -15,7 +15,7 @@
 ; is the environment in which the λ-expression was evaluated to produce the procedure. 
 
 (define (eval exp env)
-  ;(display exp) (newline)
+  (display exp) (newline)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp)        (lookup-variable-value exp env))
         ((quoted? exp)          (text-of-quotation exp))
@@ -30,6 +30,7 @@
         ((begin? exp)           (eval-sequence (begin-actions exp) env))
         ((cond? exp)            (eval (cond->if exp) env))
         ((let? exp)             (eval (let->combination exp) env))
+        ((while? exp)           (eval (while->combination exp) env))
         ((application? exp)     (my-apply (eval (operator exp) env)
                                           (list-of-values (operands exp) env)))
         (else
@@ -252,6 +253,24 @@
                       (let-body exp))
           (let-expressions exp))))
 
+;; (while predicate body)
+(define (while? exp) (tagged-list? exp 'while))
+(define (while-predicate exp) (cadr exp))
+(define (while-body exp) (caddr exp))
+(define (while->combination exp)
+  ;(display (while-body exp)) (newline)
+  (sequence->exp
+    (list
+      (list 'define
+        (list 'while-iter)
+          (make-if (while-predicate exp)
+                   (sequence->exp
+                    (list
+                      (while-body exp)
+                      (list 'while-iter)))
+                    'false))
+      (list 'while-iter))))
+
 
 #|  Evaluator Data Structures   |#
 
@@ -354,6 +373,7 @@
         (list '+ +)
         (list '- -)
         (list '= =)
+        (list '< <)
         (list 'display display) ; for debug
         ;⟨more primitives⟩
         ))

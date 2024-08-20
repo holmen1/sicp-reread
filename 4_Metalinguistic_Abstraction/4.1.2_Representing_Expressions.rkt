@@ -2,7 +2,7 @@
 
 (require "evaluator.rkt")
 
-;the-global-environment
+#| ;the-global-environment
 (define e0 (setup-environment))
 
 
@@ -97,7 +97,7 @@ Modify let->combination of Exercise 4.6 to also support named let|#
 
 (fib 120)           ;5358359254990966640871840
 (fib-derived 120)   ;5358359254990966640871840
-
+ |#
 
 #|Exercise 4.9
 Many languages support a variety of iteration constructs, such as do, for, while, and until.
@@ -106,12 +106,18 @@ so special iteration constructs provide no essential gain in computational power
 On the other hand, such constructs are often convenient. Design some iteration constructs,
 give examples of their use, and show how to implement them as derived expressions|#
 
-;test
-; (eval '(define items (cons 57 (cons 321 (cons 88 '())))) e0)
-; (eval '(for (lambda (x)
-;               (newline)
-;               (display x))
-;             items)
-;         e0)
+;; Using named-let from 4.8 (let name ((v1 e1) ... (vn en)) ⟨body⟩)
+
+;(while predicate body)
+(define e1 (setup-environment))
+(eval '(define n 0) e1)
+(eval '(while (< n 7) (set! n (+ n 1))) e1)
+(eval 'n e1)
+
+
+; (eval '(begin (define n 0)
+;               (while (< n 7) (set! n (+ n 1)))
+;               n) e1)
+
 
 
