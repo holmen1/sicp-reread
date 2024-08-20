@@ -9,7 +9,7 @@
 ; is the environment in which the λ-expression was evaluated to produce the procedure. 
 
 (define (eval exp env)
-  (display 'eval:) (display exp) (newline)
+  ;(display 'eval:) (display exp) (newline)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp)        (lookup-variable-value exp env))
         ((quoted? exp)          (text-of-quotation exp))
@@ -32,8 +32,8 @@
 
 
 (define (my-apply procedure arguments)
-  (display 'my-apply:) (display 'procedure:)  (display procedure)
-  (newline) (display 'arguments:) (display arguments) (newline)
+  ;(display 'my-apply:) (display 'procedure:)  (display procedure)
+  ;(newline) (display 'arguments:) (display arguments) (newline)
   (cond ((primitive-procedure? procedure) (apply-primitive-procedure procedure arguments))
         ((compound-procedure? procedure)  (eval-sequence (procedure-body procedure)
                                                          (extend-environment
@@ -86,7 +86,6 @@
 
 ;; Assignments and definitions
 (define (eval-assignment exp env)
-  (display 'eval-assignment:) (display exp) (newline)
   (set-variable-value! (assignment-variable exp)
                        (eval (assignment-value exp) env)
                        env)
@@ -369,8 +368,11 @@
         (list 'null? null?)
         (list '+ +)
         (list '- -)
+        (list '* *)
+        (list '/ /)
         (list '= =)
         (list '< <)
+        (list 'abs abs)
         (list 'display display) ; for debug
         ;⟨more primitives⟩
         ))
@@ -384,6 +386,10 @@
 (define (apply-primitive-procedure proc args)
   (apply-in-underlying-scheme
    (primitive-implementation proc) args))
+
+
+#|--------------------------------EXERCISES-----------------------------------------|#
+
 
 ;the-global-environment
 (define e0 (setup-environment))
@@ -489,29 +495,26 @@ so special iteration constructs provide no essential gain in computational power
 On the other hand, such constructs are often convenient. Design some iteration constructs,
 give examples of their use, and show how to implement them as derived expressions|#
 
-;; Using named-let from 4.8 (let name ((v1 e1) ... (vn en)) ⟨body⟩)
-
-; (define e1 (setup-environment))
-
-; (eval '(define x 4) e1)
-; (eval '(set! x (+ x 1)) e1)
-; (eval '(display x) e1)
-
-; (eval '(let ((n 0))
-;         (while (< n 7) (set! n (+ n 1)))
-;         n) e1)
-
+(define e1 (setup-environment))
 
 ;(while predicate body)
-; (define e1 (setup-environment))
-; (eval '(define n 0) e1)
-; (eval '(while (< n 7) (set! n (+ n 1))) e1)
-; (eval 'n e1)
+(eval '(define n 0) e1) ;=> ok
+(eval 'n e1) ;=> 0
+(eval '(while (< n 7) (set! n (+ n 1))) e1) ;=> #f
+(eval 'n e1) ;=> 7
 
+;; Calculate square root using Herons algorithm
+(eval '(define (heron S u)
+        (/ (+ u (/ S u)) 2)) e1)
+(eval '(define (sqrt x)
+        (let ((guess 1.0))
+            (while (< 1e-6 (abs (- (* guess guess) x)))
+                (set! guess (heron x guess)))
+            guess)) e1)
 
-; (eval '(begin (define n 0)
-;               (while (< n 7) (set! n (+ n 1)))
-;               n) e1)
+(eval '(sqrt 25) e1);=> 5.000000000053722
+(eval '(sqrt 2) e1) ;=> 1.4142135623746899
+
 
 
 
