@@ -108,11 +108,22 @@ give examples of their use, and show how to implement them as derived expression
 
 ;; Using named-let from 4.8 (let name ((v1 e1) ... (vn en)) ⟨body⟩)
 
-;(while predicate body)
 (define e1 (setup-environment))
-(eval '(define n 0) e1)
-(eval '(while (< n 7) (set! n (+ n 1))) e1)
-(eval 'n e1)
+
+(eval '(define x 4) e1)
+(eval '(set! x (+ x 1)) e1)
+(eval '(display x) e1)
+
+; (eval '(let ((n 0))
+;         (while (< n 7) (set! n (+ n 1)))
+;         n) e1)
+
+
+;(while predicate body)
+; (define e1 (setup-environment))
+; (eval '(define n 0) e1)
+; (eval '(while (< n 7) (set! n (+ n 1))) e1)
+; (eval 'n e1)
 
 
 ; (eval '(begin (define n 0)

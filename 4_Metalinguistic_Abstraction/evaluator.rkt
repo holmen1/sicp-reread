@@ -15,7 +15,7 @@
 ; is the environment in which the λ-expression was evaluated to produce the procedure. 
 
 (define (eval exp env)
-  (display exp) (newline)
+  (display 'eval:) (display exp) (newline)
   (cond ((self-evaluating? exp) exp)
         ((variable? exp)        (lookup-variable-value exp env))
         ((quoted? exp)          (text-of-quotation exp))
@@ -38,6 +38,8 @@
 
 
 (define (my-apply procedure arguments)
+  (display 'my-apply:) (display 'procedure:)  (display procedure)
+  (newline) (display 'arguments:) (display arguments) (newline)
   (cond ((primitive-procedure? procedure) (apply-primitive-procedure procedure arguments))
         ((compound-procedure? procedure)  (eval-sequence (procedure-body procedure)
                                                          (extend-environment
@@ -90,6 +92,7 @@
 
 ;; Assignments and definitions
 (define (eval-assignment exp env)
+  (display 'eval-assignment:) (display exp) (newline)
   (set-variable-value! (assignment-variable exp)
                        (eval (assignment-value exp) env)
                        env)
